@@ -244,32 +244,38 @@
     </target>
 
     <target name="ep">
-    <delete dir="build"/>
-    <mkdir dir="build"/>
+      <delete dir="${build.classes.main}"/>
+      <mkdir dir="${build.classes.main}"/>
 
-    <property name="errorProneJavac.jar" location="${basedir}/ep/javac-9+181-r4173-1.jar"/>
+      <property name="errorProneJavac.jar" location="${basedir}/ep/javac-9+181-r4173-1.jar"/>
 
-    <!-- using github.com/google/error-prone-javac is required when running on JDK 8 -->
-    <condition property="jdk9orlater">
-      <javaversion atleast="9"/>
-    </condition>
+      <!-- using github.com/google/error-prone-javac is required when running on JDK 8 -->
+      <condition property="jdk9orlater">
+        <javaversion atleast="9"/>
+      </condition>
 
-    <path id="processorpath.ref">
-      <pathelement location="${basedir}/ep/error_prone_core-2.3.2-with-dependencies.jar"/>
-      <pathelement location="${basedir}/ep/jFormatString-3.0.0.jar"/>
-      <pathelement location="${basedir}/ep/dataflow-2.5.7.jar"/>
-      <pathelement location="${basedir}/ep/javacutil-2.5.7.jar"/>
-      <!-- Add annotation processors and Error Prone custom checks here if needed -->
-    </path>
+      <path id="processorpath.ref">
+        <pathelement location="${basedir}/ep/error_prone_core-2.3.2-with-dependencies.jar"/>
+        <pathelement location="${basedir}/ep/jFormatString-3.0.0.jar"/>
+        <pathelement location="${basedir}/ep/dataflow-2.5.7.jar"/>
+        <pathelement location="${basedir}/ep/javacutil-2.5.7.jar"/>
+        <!-- Add annotation processors and Error Prone custom checks here if needed -->
+      </path>
 
-    <javac srcdir="src" destdir="build" fork="yes" includeantruntime="no">
-      <compilerarg value="-J-Xbootclasspath/p:${errorProneJavac.jar}" unless:set="jdk9orlater"/>
-      <compilerarg line="-XDcompilePolicy=simple"/>
-      <compilerarg value="-processorpath"/>
-      <compilerarg pathref="processorpath.ref"/>
-      <compilerarg value="-Xplugin:ErrorProne -XepDisableAllChecks" />
-    </javac>
-  </target>
+      <javac destdir="${build.classes.main}" fork="yes" includeantruntime="no">
+        <src path="${build.src.java}"/>
+        <src path="${build.src.java8}"/>
+        <src path="${build.src.gen-java}"/>
+        <compilerarg value="-J-Xbootclasspath/p:${errorProneJavac.jar}" unless:set="jdk9orlater"/>
+        <compilerarg line="-XDcompilePolicy=simple"/>
+        <compilerarg value="-processorpath"/>
+        <compilerarg pathref="processorpath.ref"/>
+        <compilerarg value="-Xplugin:ErrorProne -XepDisableAllChecks" />
+        <classpath>
+          <path refid="cassandra.classpath"/>
+        </classpath>
+      </javac>
+    </target>
 
     <target name="clean" description="Remove all locally created artifacts">
         <delete dir="${build.test.dir}" />
